@@ -24,6 +24,12 @@ jobs:
       - name: Package Application
         run: zip -r app.zip .
 
+      - name: Prepare SSH Environment
+        run: |
+          mkdir -p ~/.ssh
+          touch ~/.ssh/known_hosts
+          chmod 600 ~/.ssh/known_hosts
+
       - name: Write SSH Key
         run: |
           echo "${{ secrets.EC2_KEY }}" > key.pem
