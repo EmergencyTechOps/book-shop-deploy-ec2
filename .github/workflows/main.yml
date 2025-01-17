@@ -24,11 +24,14 @@ jobs:
       - name: Package Application
         run: zip -r app.zip .
 
-      - name: Debug SSH Connection (Optional Step for Troubleshooting)
+      - name: Write SSH Key
         run: |
           echo "${{ secrets.EC2_KEY }}" > key.pem
           chmod 600 key.pem
-          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo Connection Successful"
+
+      - name: Debug SSH Connection
+        run: |
+          ssh -vvv -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo Connection Successful"
 
       - name: Copy files to EC2
         uses: appleboy/scp-action@master
