@@ -24,17 +24,24 @@ jobs:
       - name: Package Application
         run: zip -r app.zip .
 
+      - name: Debug SSH Connection (Optional Step for Troubleshooting)
+        run: |
+          echo "${{ secrets.EC2_KEY }}" > key.pem
+          chmod 600 key.pem
+          ssh -o StrictHostKeyChecking=no -i key.pem ${{ secrets.EC2_USER }}@${{ secrets.EC2_HOST }} "echo Connection Successful"
+
       - name: Copy files to EC2
-        uses: appleboy/scp-action@v0.1.1
+        uses: appleboy/scp-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           source: "app.zip"
           target: "/home/ubuntu/"
+          debug: true
 
       - name: Deploy Application
-        uses: appleboy/ssh-action@v0.1.1
+        uses: appleboy/ssh-action@master
         with:
           host: ${{ secrets.EC2_HOST }}
           username: ${{ secrets.EC2_USER }}
