@@ -1,4 +1,4 @@
-name: Deploy to  EC2
+name: Deploy to EC2
 
 on:
   push:
@@ -22,7 +22,7 @@ jobs:
         run: npm install
 
       - name: Package Application
-        run: zip -r app.zip .
+        run: zip -r app.zip . -x ".git/*" "node_modules/*"
 
       - name: Prepare SSH Environment
         run: |
@@ -56,11 +56,19 @@ jobs:
           username: ${{ secrets.EC2_USER }}
           key: ${{ secrets.EC2_KEY }}
           script: |
+            # Update system and install dependencies
             sudo apt-get update
             sudo apt-get install -y nodejs npm unzip
-            rm -rf /var/www/bookshop
-            mkdir -p /var/www/bookshop
+            sudo npm install -g pm2
+
+            # Ensure /var/www directory exists with correct permissions
+            sudo mkdir -p /var/www/bookshop
+            sudo chown -R $USER:$USER /var/www/bookshop
+
+            # Unzip application and install dependencies
             unzip ~/app.zip -d /var/www/bookshop
             cd /var/www/bookshop
             npm install
+
+            # Start or restart the application with pm2
             pm2 restart app || pm2 start app.js --name "bookshop"
